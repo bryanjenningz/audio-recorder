@@ -1,24 +1,13 @@
 import React, {Component} from 'react'
 import {render} from 'react-dom'
 
-class App extends Component {
+class AudioRecorder {
   constructor() {
-    super()
-
     this.state = {
-      recording: false,
-      recordings: []
+      isRecording: false,
+      recordingBlobs: []
     }
 
-    // Initialized in initAudio
-    this.recorder = undefined
-  }
-
-  componentDidMount() {
-    this.initAudio()
-  }
-
-  initAudio() {
     let audioContext
     try {
       // webkit shim
@@ -41,56 +30,66 @@ class App extends Component {
     .catch((e) => console.log(`No audio: ${e}`))
   }
 
-  createDownloadLink() {
-    if (this.recorder) {
-      this.recorder.exportWAV((blob) => {
-        const url = URL.createObjectURL(blob)
-        const downloadUrl = `${new Date().toISOString()}.wav`
-
-        const recordingEntry = (
-          <span>
-            <audio controls={true} src={url}></audio>
-            <a href={url} download={downloadUrl}>{downloadUrl}</a>
-          </span>
-        )
-
-        this.setState({recordings: [...this.state.recordings, recordingEntry]})
-      })
-    }
+  isRecording() {
+    return this.state.isRecording
   }
 
-  startRecording() {
-    if (this.recorder) {
-      this.setState({recording: true})
-      this.recorder.record()
-    }
+  record() {
+    this.state.isRecording = true
+    this.recorder.record()
   }
 
-  stopRecording() {
-    if (this.recorder) {
+  stop() {
+    return new Promise((resolve, reject) => {
       this.recorder.stop()
-      this.setState({recording: false})
-      this.createDownloadLink()
+      this.recorder.exportWAV((blob) => {
+        this.state.isRecording = false
+        this.state.recordingBlobs.push(blob)
+        resolve(this.getRecordingUrls())
+      })
       this.recorder.clear()
+    })
+  }
+
+  getRecordingUrls() {
+    return this.state.recordingBlobs.map(blob => URL.createObjectURL(blob))
+  }
+}
+
+class DisplayAudioRecordings extends Component {
+  constructor() {
+    super()
+    this.state = {
+      isRecording: false,
+      recordingUrls: []
     }
+    this.recorder = new AudioRecorder()
+  }
+
+  record() {
+    this.recorder.record()
+    this.setState({isRecording: true})
+  }
+
+  stop() {
+    this.recorder.stop().then(recordingUrls => {
+      this.setState({recordingUrls, isRecording: false})
+    })
   }
 
   render() {
-    const {recording, recordings} = this.state
-
+    const {isRecording, recordingUrls} = this.state
     return (
       <div>
-        <button onClick={this[`${recording ? 'stop' : 'start'}Recording`].bind(this)}>
-          {recording ? 'Stop' : 'Start'}
+        <button onClick={() => this[isRecording ? 'stop' : 'record']()}>
+          {isRecording ? 'Stop' : 'Record'}
         </button>
-        
-        {recordings.length ? <h2>Recordings</h2> : null}
-        <div>
-          {recordings.map((recording, i) => <div key={i}>{recording}</div>)}
-        </div>
+        {recordingUrls.map(url =>
+          <div key={url}><audio controls={true} src={url} /></div>
+        )}
       </div>
     )
   }
 }
 
-render(<App />, document.querySelector('#root'))
+render(<DisplayAudioRecordings />, document.querySelector('#root'))

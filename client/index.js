@@ -10,8 +10,7 @@ class App extends Component {
       recordings: []
     }
 
-    // Initialized in initAudio and startUserMedia
-    this.audioContext = undefined
+    // Initialized in initAudio
     this.recorder = undefined
   }
 
@@ -20,25 +19,26 @@ class App extends Component {
   }
 
   initAudio() {
+    let audioContext
     try {
       // webkit shim
       window.AudioContext = window.AudioContext || window.webkitAudioContext
       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
       window.URL = window.URL || window.webkitURL
       
-      this.audioContext = new AudioContext
+      audioContext = new AudioContext()
     } catch (e) {
       alert('There is no web audio support for this browser. Get the latest version of Google Chrome.')
     }
-    
-    navigator.getUserMedia({audio: true}, this.startUserMedia.bind(this), (e) => {
-      console.log(`No audio: ${e}`)
-    })
-  }
 
-  startUserMedia(stream) {
-    const input = this.audioContext.createMediaStreamSource(stream)
-    this.recorder = new Recorder(input)
+    const startUserMedia = (stream) => {
+      const input = audioContext.createMediaStreamSource(stream)
+      this.recorder = new Recorder(input)
+    }
+
+    navigator.mediaDevices.getUserMedia({audio: true})
+    .then(startUserMedia)
+    .catch((e) => console.log(`No audio: ${e}`))
   }
 
   createDownloadLink() {

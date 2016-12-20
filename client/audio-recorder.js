@@ -1,3 +1,5 @@
+import Recorder from './recorder'
+
 class AudioRecorder {
   constructor() {
     this.state = {

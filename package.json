@@ -1,7 +1,7 @@
 {
   "name": "audio-recorder",
   "version": "1.0.0",
-  "description": "",
+  "description": "React component that allows you to record audio.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,6 +16,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "html-webpack-plugin": "^2.24.1",
+    "inline-worker": "^1.1.0",
     "lodash": "^4.17.2",
     "react": "^15.4.0",
     "react-dom": "^15.4.0",
@@ -23,5 +24,14 @@
     "react-router": "^3.0.0",
     "redux": "^3.6.0",
     "webpack": "^1.13.3"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bryanjenningz/audio-recorder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bryanjenningz/audio-recorder/issues"
+  },
+  "homepage": "https://github.com/bryanjenningz/audio-recorder#readme"
 }
